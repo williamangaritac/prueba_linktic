@@ -10,7 +10,7 @@ COPY src ./src
 
 # Instalar Maven y compilar
 RUN apk add --no-cache maven && \
-    mvn clean package -DskipTests
+    mvn clean package -Dmaven.test.skip=true
 
 # Stage 2: Runtime
 FROM eclipse-temurin:17-jre-alpine
