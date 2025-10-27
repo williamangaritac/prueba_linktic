@@ -1,0 +1,47 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: inventory-service
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/linktic_inventory
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  cloud:
+    discovery:
+      enabled: true
+    compatibility-verifier:
+      enabled: false
+
+# Eureka Client Configuration
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: inventory-service
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# Logging
+logging:
+  level:
+    com.netflix.discovery: DEBUG
+    com.netflix.eureka: DEBUG
+    org.springframework.cloud: DEBUG
+

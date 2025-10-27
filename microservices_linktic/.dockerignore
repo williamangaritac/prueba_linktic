@@ -1,0 +1,37 @@
+# Ignorar archivos innecesarios en Docker builds
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Maven
+target/
+!target/*.jar
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentación
+*.md
+*.docx
+*.png
+
+# Scripts
+*.ps1
+*.sh
+*.bat
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+

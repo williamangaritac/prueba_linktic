@@ -1,0 +1,134 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: notifications-service
+  cloud:
+    compatibility-verifier:
+      enabled: false
+  
+  datasource:
+    url: jdbc:h2:mem:notifications_db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notifications-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  # Email Configuration (usando configuración de desarrollo)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: william.angaritac@gmail.com
+    password: # Dejar vacío para desarrollo - usar variables de entorno en producción
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    # Para desarrollo, simular envío de emails sin servidor SMTP real
+    test-connection: false
+
+  security:
+    user:
+      name: admin
+      password: admin123
+      roles: ADMIN
+
+# OpenAPI/Swagger Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    zipkin:
+      endpoint: http://localhost:9411/api/v2/spans
+
+# Logging
+logging:
+  level:
+    com.linktic_test.notifications_service: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.kafka: DEBUG
+    org.springframework.mail: DEBUG
+
+# Custom application properties
+app:
+  kafka:
+    topic:
+      order-events: order-events
+  email:
+    from: william.angaritac@gmail.com
+    to: william.angaritac@gmail.com
+    enabled: true # Cambiar a false para deshabilitar envío de emails en desarrollo
+  products-service:
+    url: http://localhost:8081/api/v1
+  inventory-service:
+    url: http://localhost:8082/api/v1
+  orders-service:
+    url: http://localhost:8083/api/v1
+
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

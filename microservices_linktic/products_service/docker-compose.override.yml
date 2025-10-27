@@ -1,0 +1,27 @@
+# Override configuration for local development
+# This file is automatically loaded by docker-compose and overrides settings in docker-compose.yml
+
+version: '3.8'
+
+services:
+  postgres:
+    # For development, we can expose the database for direct access
+    ports:
+      - "5432:5432"
+    environment:
+      # Enable detailed logging for development
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+
+  products-service:
+    # For development, rebuild the image every time
+    build:
+      context: .
+      dockerfile: Dockerfile
+      cache_from:
+        - linktic_products_service:latest
+    environment:
+      # Enable debug logging for development
+      LOGGING_LEVEL_COM_LINKTIC_TEST_PRODUCTS_SERVICE: DEBUG
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: DEBUG
+      LOGGING_LEVEL_ORG_HIBERNATE_SQL: DEBUG
+

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Swagger Aggregator - Linktic Microservicios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .service-header h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .service-header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .service-body {
+            padding: 20px;
+        }
+
+        .service-info {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .service-info strong {
+            color: #333;
+        }
+
+        .service-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-swagger {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-swagger:hover {
+            background: #5568d3;
+        }
+
+        .btn-health {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-health:hover {
+            background: #38a169;
+        }
+
+        .btn-docs {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-docs:hover {
+            background: #dd6b20;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-running {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-pending {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .quick-links {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .quick-links h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .link-item {
+            padding: 15px;
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover {
+            background: #edf2f7;
+            border-left-color: #764ba2;
+        }
+
+        .link-item a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .link-item a:hover {
+            color: #764ba2;
+        }
+
+        footer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Linktic Microservicios</h1>
+            <p>Agregador de APIs y Documentación Swagger</p>
+        </header>
+
+        <div class="quick-links">
+            <h3>⚡ Accesos Rápidos</h3>
+            <div class="links-grid">
+                <div class="link-item">
+                    <a href="http://localhost:4200" target="_blank">
+                        <span class="icon">🎨</span>
+                        <span>Frontend Angular</span>
+                    </a>
+                </div>
+                <div class="link-item">
+                    <a href="http://localhost:8761" target="_blank">
+                        <span class="icon">📊</span>
+                        <span>Eureka Dashboard</span>
+                    </a>
+                </div>
+                <div class="link-item">
+                    <a href="http://localhost:3000" target="_blank">
+                        <span class="icon">📈</span>
+                        <span>Grafana (Opcional)</span>
+                    </a>
+                </div>
+                <div class="link-item">
+                    <a href="http://localhost:9090" target="_blank">
+                        <span class="icon">📉</span>
+                        <span>Prometheus (Opcional)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="services-grid">
+            <!-- Products Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <h2>📦 Products Service</h2>
+                    <p>Gestión de Catálogo de Productos</p>
+                </div>
+                <div class="service-body">
+                    <div class="service-info">
+                        <strong>Puerto:</strong> 8081
+                    </div>
+                    <div class="service-info">
+                        <strong>Base de Datos:</strong> PostgreSQL
+                    </div>
+                    <div class="service-info">
+                        <strong>Descripción:</strong> API para gestionar productos, SKUs y catálogo
+                    </div>
+                    <span class="status-badge status-running">✓ En ejecución</span>
+                    <div class="service-buttons">
+                        <a href="http://localhost:8081/api/v1/swagger-ui.html" target="_blank" class="btn btn-swagger">Swagger UI</a>
+                        <a href="http://localhost:8081/api/v1/actuator/health" target="_blank" class="btn btn-health">Health</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <h2>📊 Inventory Service</h2>
+                    <p>Gestión de Inventario</p>
+                </div>
+                <div class="service-body">
+                    <div class="service-info">
+                        <strong>Puerto:</strong> 8082
+                    </div>
+                    <div class="service-info">
+                        <strong>Base de Datos:</strong> PostgreSQL
+                    </div>
+                    <div class="service-info">
+                        <strong>Descripción:</strong> API para gestionar stock y disponibilidad
+                    </div>
+                    <span class="status-badge status-running">✓ En ejecución</span>
+                    <div class="service-buttons">
+                        <a href="http://localhost:8082/api/v1/swagger-ui.html" target="_blank" class="btn btn-swagger">Swagger UI</a>
+                        <a href="http://localhost:8082/api/v1/actuator/health" target="_blank" class="btn btn-health">Health</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <h2>🛒 Orders Service</h2>
+                    <p>Gestión de Órdenes</p>
+                </div>
+                <div class="service-body">
+                    <div class="service-info">
+                        <strong>Puerto:</strong> 8083
+                    </div>
+                    <div class="service-info">
+                        <strong>Base de Datos:</strong> MySQL
+                    </div>
+                    <div class="service-info">
+                        <strong>Descripción:</strong> API para crear y gestionar órdenes de compra
+                    </div>
+                    <span class="status-badge status-running">✓ En ejecución</span>
+                    <div class="service-buttons">
+                        <a href="http://localhost:8083/api/v1/swagger-ui.html" target="_blank" class="btn btn-swagger">Swagger UI</a>
+                        <a href="http://localhost:8083/api/v1/actuator/health" target="_blank" class="btn btn-health">Health</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <h2>📧 Notifications Service</h2>
+                    <p>Gestión de Notificaciones</p>
+                </div>
+                <div class="service-body">
+                    <div class="service-info">
+                        <strong>Puerto:</strong> 8084
+                    </div>
+                    <div class="service-info">
+                        <strong>Base de Datos:</strong> PostgreSQL (H2)
+                    </div>
+                    <div class="service-info">
+                        <strong>Descripción:</strong> API para enviar notificaciones por email
+                    </div>
+                    <span class="status-badge status-running">✓ En ejecución</span>
+                    <div class="service-buttons">
+                        <a href="http://localhost:8084/api/v1/swagger-ui.html" target="_blank" class="btn btn-swagger">Swagger UI</a>
+                        <a href="http://localhost:8084/api/v1/actuator/health" target="_blank" class="btn btn-health">Health</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>🔧 Linktic Microservicios - Sistema de E-commerce | Desarrollado con Spring Boot, Angular y Docker</p>
+        </footer>
+    </div>
+</body>
+</html>
+

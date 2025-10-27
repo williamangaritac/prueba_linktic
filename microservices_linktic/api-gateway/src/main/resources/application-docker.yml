@@ -1,0 +1,141 @@
+# Docker profile configuration for API Gateway
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  
+  cloud:
+    gateway:
+      # Service Discovery con Eureka
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: false
+      
+      # Rutas configuradas manualmente para mayor control
+      routes:
+        # Products Service
+        - id: products-service
+          uri: lb://PRODUCTS-SERVICE
+          predicates:
+            - Path=/api/v1/products/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productsCircuitBreaker
+                fallbackUri: forward:/fallback/products
+            - StripPrefix=0
+
+        # Inventory Service
+        - id: inventory-service
+          uri: lb://INVENTORY-SERVICE
+          predicates:
+            - Path=/api/v1/inventory/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: inventoryCircuitBreaker
+                fallbackUri: forward:/fallback/inventory
+            - StripPrefix=0
+
+        # Orders Service - Frontend
+        - id: orders-service-frontend
+          uri: lb://ORDERS-SERVICE
+          predicates:
+            - Path=/api/v1/frontend/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: ordersCircuitBreaker
+                fallbackUri: forward:/fallback/orders
+            - StripPrefix=0
+
+        # Orders Service
+        - id: orders-service
+          uri: lb://ORDERS-SERVICE
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: ordersCircuitBreaker
+                fallbackUri: forward:/fallback/orders
+            - StripPrefix=0
+
+        # Notifications Service
+        - id: notifications-service
+          uri: lb://NOTIFICATIONS-SERVICE
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationsCircuitBreaker
+                fallbackUri: forward:/fallback/notifications
+            - StripPrefix=0
+      
+      # Configuración global de filtros
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+# Eureka Client - Docker environment
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: api-gateway
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+    instances:
+      productsCircuitBreaker:
+        base-config: default
+      inventoryCircuitBreaker:
+        base-config: default
+      ordersCircuitBreaker:
+        base-config: default
+      notificationsCircuitBreaker:
+        base-config: default
+  
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5s
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
+    io.github.resilience4j: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
+    com.netflix.discovery: DEBUG
+

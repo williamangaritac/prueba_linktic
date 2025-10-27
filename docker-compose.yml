@@ -1,0 +1,278 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # BASES DE DATOS
+  # ========================================
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./microservices_linktic/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: linktic_orders
+      MYSQL_USER: linktic
+      MYSQL_PASSWORD: linktic123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./microservices_linktic/init-mysql.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # MICROSERVICIOS BACKEND
+  # ========================================
+
+  eureka-server:
+    build:
+      context: ./microservices_linktic/eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  api-gateway:
+    build:
+      context: ./microservices_linktic/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  products-service:
+    build:
+      context: ./microservices_linktic/products_service
+      dockerfile: Dockerfile
+    container_name: products-service
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/linktic_products
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  inventory-service:
+    build:
+      context: ./microservices_linktic/inventory_service
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    ports:
+      - "8082:8082"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/linktic_inventory
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  orders-service:
+    build:
+      context: ./microservices_linktic/orders_service
+      dockerfile: Dockerfile
+    container_name: orders-service
+    ports:
+      - "8083:8083"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/linktic_orders
+      - SPRING_DATASOURCE_USERNAME=linktic
+      - SPRING_DATASOURCE_PASSWORD=linktic123
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - PRODUCTS_SERVICE_URL=http://products-service:8081
+      - INVENTORY_SERVICE_URL=http://inventory-service:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      products-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  notifications-service:
+    build:
+      context: ./microservices_linktic/notifications_service
+      dockerfile: Dockerfile
+    container_name: notifications-service
+    ports:
+      - "8084:8084"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/linktic_notifications
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=william.angaritac@gmail.com
+      - SPRING_MAIL_PASSWORD=${GMAIL_APP_PASSWORD:-your-app-password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ========================================
+  # SWAGGER AGGREGATOR (NGINX)
+  # ========================================
+
+  swagger-aggregator:
+    image: nginx:alpine
+    container_name: swagger-aggregator
+    ports:
+      - "8090:80"
+    volumes:
+      - ./swagger-aggregator.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      - microservices-network
+    depends_on:
+      - products-service
+      - inventory-service
+      - orders-service
+      - notifications-service
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ========================================
+  # FRONTEND ANGULAR
+  # ========================================
+
+  frontend:
+    build:
+      context: ./frontend_angular
+      dockerfile: Dockerfile
+    container_name: frontend-angular
+    ports:
+      - "4200:80"
+    networks:
+      - microservices-network
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      products-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      orders-service:
+        condition: service_healthy
+    environment:
+      - API_URL=http://localhost:8080/api/v1
+      - INVENTORY_API_URL=http://localhost:8080/api/v1/inventory
+      - ORDERS_API_URL=http://localhost:8080/api/v1/orders
+
+# ========================================
+# NETWORKS
+# ========================================
+
+networks:
+  microservices-network:
+    driver: bridge
+
+# ========================================
+# VOLUMES
+# ========================================
+
+volumes:
+  postgres_data:
+  mysql_data:
+

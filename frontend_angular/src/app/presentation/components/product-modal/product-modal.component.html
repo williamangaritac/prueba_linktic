@@ -1,0 +1,101 @@
+<div
+  *ngIf="isOpen && product"
+  (click)="onBackdropClick($event)"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+
+  <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <h2 class="text-2xl font-bold text-gray-900">{{ product.name }}</h2>
+        <span
+          class="px-3 py-1 text-sm font-semibold rounded-full"
+          [ngClass]="statusBadgeClass">
+          {{ statusText }}
+        </span>
+      </div>
+      <button
+        (click)="onClose()"
+        class="text-gray-500 hover:text-gray-700 text-2xl font-bold">
+        &times;
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6">
+      <!-- Product Image -->
+      <img
+        [src]="productImage"
+        [alt]="product.name"
+        class="w-full h-80 object-cover rounded-lg mb-6 shadow-md">
+
+      <div class="space-y-6">
+        <!-- Description -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
+          <p class="text-gray-600 leading-relaxed">{{ product.description }}</p>
+        </div>
+
+        <!-- Product Details Grid -->
+        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-500 mb-1">SKU</h3>
+            <p class="text-lg font-medium text-gray-900">{{ product.sku }}</p>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-500 mb-1">ID</h3>
+            <p class="text-lg font-medium text-gray-900">#{{ product.id }}</p>
+          </div>
+        </div>
+
+        <!-- Price and Stock Section -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Price -->
+          <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Precio</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ formattedPrice }}</p>
+          </div>
+
+          <!-- Stock -->
+          <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Stock Disponible</h3>
+            <p
+              class="text-3xl font-bold"
+              [ngClass]="stockBadgeClass">
+              {{ product.stock || 0 }} unidades
+            </p>
+            <p *ngIf="isOutOfStock" class="text-sm text-red-600 mt-2">Sin stock disponible</p>
+            <p *ngIf="isLowStock && !isOutOfStock" class="text-sm text-orange-600 mt-2">Stock bajo</p>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-500 mb-1">Fecha de Creación</h3>
+            <p class="text-sm text-gray-700">{{ formatDate(product.createdAt) }}</p>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-500 mb-1">Última Actualización</h3>
+            <p class="text-sm text-gray-700">{{ formatDate(product.updatedAt) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex gap-3">
+        <button
+          (click)="onClose()"
+          class="flex-1 bg-gray-200 text-gray-800 px-6 py-3 rounded-md hover:bg-gray-300 transition-colors font-medium">
+          Cerrar
+        </button>
+        <button
+          [disabled]="!product.status || isOutOfStock"
+          class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed">
+          {{ isOutOfStock ? 'Sin Stock' : (product.status ? 'Comprar' : 'No Disponible') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

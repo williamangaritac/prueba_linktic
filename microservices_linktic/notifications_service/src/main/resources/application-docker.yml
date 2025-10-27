@@ -1,0 +1,105 @@
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  kafka:
+    enabled: true
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: notifications-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  datasource:
+    url: jdbc:postgresql://postgres_db:5432/linktic_notifications
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+    hikari:
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  h2:
+    console:
+      enabled: false
+
+  # Email Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:william.angaritac@gmail.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    test-connection: false
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: notifications-service
+
+# Service URLs
+app:
+  kafka:
+    topic:
+      order-events: order-events
+  email:
+    from: william.angaritac@gmail.com
+    to: william.angaritac@gmail.com,contacto@linktic.com
+    enabled: true
+  products-service:
+    url: http://products-service:8081/api/v1
+  inventory-service:
+    url: http://inventory-service:8082/api/v1
+  orders-service:
+    url: http://orders-service:8083/api/v1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans
+
+# Logging
+logging:
+  level:
+    com.linktic_test.notifications_service: INFO
+    org.springframework.kafka: INFO
+    org.springframework.mail: DEBUG
+

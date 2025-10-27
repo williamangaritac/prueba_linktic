@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS inventory (
+    id BIGSERIAL PRIMARY KEY,
+    sku VARCHAR(100) NOT NULL UNIQUE,
+    quantity BIGINT NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+    created_at TIMESTAM
+	P DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+select * from inventory

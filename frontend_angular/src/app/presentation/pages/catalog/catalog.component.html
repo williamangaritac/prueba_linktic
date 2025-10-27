@@ -1,0 +1,69 @@
+<section id="catalogo" class="py-12">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">
+      Nuestro Catálogo de Soluciones
+    </h2>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="loading" class="text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Cargando productos...</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div *ngIf="!loading">
+      <!-- Info -->
+      <div class="text-center mb-6 text-gray-600">
+        <p>Mostrando {{ products.length }} productos de {{ totalElements }} totales</p>
+        <p class="text-sm">Página {{ currentPageForPagination }} de {{ totalPagesForPagination }}</p>
+      </div>
+
+      <!-- Paginación Superior -->
+      <app-pagination
+        [totalItems]="totalElements"
+        [itemsPerPage]="6"
+        [currentPage]="currentPageForPagination"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
+
+      <!-- Grid de Productos -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+        <app-product-card
+          *ngFor="let product of products"
+          [product]="product"
+          (viewDetails)="onViewDetails($event)"
+          (purchase)="onPurchase($event)">
+        </app-product-card>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="products.length === 0" class="text-center py-12">
+        <p class="text-gray-600 text-lg">No hay productos disponibles</p>
+      </div>
+
+      <!-- Paginación Inferior -->
+      <app-pagination
+        [totalItems]="totalElements"
+        [itemsPerPage]="6"
+        [currentPage]="currentPageForPagination"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
+    </div>
+  </div>
+</section>
+
+<!-- Modal de Detalles -->
+<app-product-modal
+  [product]="selectedProduct"
+  [isOpen]="isModalOpen"
+  (close)="onCloseModal()">
+</app-product-modal>
+
+<!-- Modal de Compra -->
+<app-purchase-modal
+  [product]="productToPurchase"
+  [isOpen]="isPurchaseModalOpen"
+  (close)="onClosePurchaseModal()"
+  (confirmPurchase)="onConfirmPurchase($event)">
+</app-purchase-modal>
+

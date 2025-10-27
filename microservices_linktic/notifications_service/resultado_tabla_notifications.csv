@@ -1,0 +1,129 @@
+"id","order_number","order_id","recipient_email","subject","message","status","type","sent_at","created_at","error_message"
+"1","ORD-2024-001","1","contacto@linktic.com","Confirmación de Orden ORD-2024-001","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-001
+- Total: $5,000.00
+
+Productos:
+1. Solucion E-commerce (SKU: 29444ed7a8f8495587365a6b61458735) - Cantidad: 1 - Precio: $2,805.00
+2. Core de Seguros (SKU: 8b5c9d2e1f4a6b3c7d8e9f0a1b2c3d4e) - Cantidad: 1 - Precio: $2,195.00
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-15 21:19:49.236206","2025-10-15 21:19:49.236206",NULL
+"2","ORD-2024-002","2","contacto@linktic.com","Confirmación de Orden ORD-2024-002","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-002
+- Total: $3,500.00
+
+Productos:
+1. HIS/Telesalud (SKU: 5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c) - Cantidad: 1 - Precio: $3,500.00
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-16 21:19:49.236206","2025-10-16 21:19:49.236206",NULL
+"3","ORD-2024-003","3","contacto@linktic.com","Confirmación de Orden ORD-2024-003","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-003
+- Total: $7,200.00
+
+Productos:
+1. ERP (SKU: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d) - Cantidad: 2 - Precio: $1,800.00 c/u
+2. CRM (SKU: 7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b) - Cantidad: 2 - Precio: $1,800.00 c/u
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-17 21:19:49.236206","2025-10-17 21:19:49.236206",NULL
+"4","ORD-2024-004","4","contacto@linktic.com","Confirmación de Orden ORD-2024-004","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-004
+- Total: $4,500.00
+
+Productos:
+1. Plataforma de Integracion (SKU: 3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f) - Cantidad: 1 - Precio: $2,250.00
+2. Sistema de Gestion Documental (SKU: 9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a) - Cantidad: 1 - Precio: $2,250.00
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-18 21:19:49.236206","2025-10-18 21:19:49.236206",NULL
+"5","ORD-2024-005","5","contacto@linktic.com","Confirmación de Orden ORD-2024-005","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-005
+- Total: $6,300.00
+
+Productos:
+1. Portal de Autoservicio (SKU: 5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b) - Cantidad: 3 - Precio: $2,100.00 c/u
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-19 21:19:49.236206","2025-10-19 21:19:49.236206",NULL
+"6","ORD-2024-006","6","contacto@linktic.com","Confirmación de Orden ORD-2024-006","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-006
+- Total: $3,000.00
+
+Productos:
+1. Sistema de Reportes y Analytics (SKU: 1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c) - Cantidad: 2 - Precio: $1,500.00 c/u
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-20 21:19:49.236206","2025-10-20 21:19:49.236206",NULL
+"7","ORD-2024-007","7","contacto@linktic.com","Confirmación de Orden ORD-2024-007","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-007
+- Total: $8,500.00
+
+Productos:
+1. Solucion E-commerce (SKU: 29444ed7a8f8495587365a6b61458735) - Cantidad: 1 - Precio: $2,805.00
+2. Core de Seguros (SKU: 8b5c9d2e1f4a6b3c7d8e9f0a1b2c3d4e) - Cantidad: 1 - Precio: $2,195.00
+3. HIS/Telesalud (SKU: 5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c) - Cantidad: 1 - Precio: $3,500.00
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-21 21:19:49.236206","2025-10-21 21:19:49.236206",NULL
+"8","ORD-2024-008","8","contacto@linktic.com","Confirmación de Orden ORD-2024-008","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-008
+- Total: $5,400.00
+
+Productos:
+1. ERP (SKU: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d) - Cantidad: 3 - Precio: $1,800.00 c/u
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-22 21:19:49.236206","2025-10-22 21:19:49.236206",NULL
+"9","ORD-2024-009","9","contacto@linktic.com","Confirmación de Orden ORD-2024-009","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-009
+- Total: $4,000.00
+
+Productos:
+1. CRM (SKU: 7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b) - Cantidad: 1 - Precio: $1,800.00
+2. Sistema de Gestion Documental (SKU: 9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a) - Cantidad: 1 - Precio: $2,200.00
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-23 21:19:49.236206","2025-10-23 21:19:49.236206",NULL
+"10","ORD-2024-010","10","contacto@linktic.com","Confirmación de Orden ORD-2024-010","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-010
+- Total: $10,500.00
+
+Productos:
+1. Solucion E-commerce (SKU: 29444ed7a8f8495587365a6b61458735) - Cantidad: 2 - Precio: $2,805.00 c/u
+2. Portal de Autoservicio (SKU: 5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b) - Cantidad: 2 - Precio: $2,100.00 c/u
+3. Sistema de Reportes y Analytics (SKU: 1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c) - Cantidad: 1 - Precio: $1,485.00
+
+¡Gracias por confiar en LINKTIC!","SENT","ORDER_CREATED","2025-10-24 21:19:49.236206","2025-10-24 21:19:49.236206",NULL
+"11","ORD-2024-011","11","contacto@linktic.com","Confirmación de Orden ORD-2024-011","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-011
+- Total: $2,805.00
+
+Productos:
+1. Solucion E-commerce (SKU: 29444ed7a8f8495587365a6b61458735) - Cantidad: 1 - Precio: $2,805.00
+
+¡Gracias por confiar en LINKTIC!","PENDING","ORDER_CREATED",NULL,"2025-10-25 21:19:49.236206",NULL
+"12","ORD-2024-012","12","contacto@linktic.com","Confirmación de Orden ORD-2024-012","¡Gracias por tu compra!
+
+Detalles de tu orden:
+- Número de Orden: ORD-2024-012
+- Total: $3,500.00
+
+Productos:
+1. HIS/Telesalud (SKU: 5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c) - Cantidad: 1 - Precio: $3,500.00
+
+¡Gracias por confiar en LINKTIC!","FAILED","ORDER_CREATED",NULL,"2025-10-25 21:19:49.236206","SMTP server connection timeout"

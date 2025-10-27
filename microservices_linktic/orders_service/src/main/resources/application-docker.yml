@@ -1,0 +1,60 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: orders-service
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  datasource:
+    url: jdbc:mysql://mysql_db:3306/linktic_orders?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: rootpassword
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# Custom application properties
+app:
+  inventory-service:
+    url: http://inventory-service:8082/api/v1
+  products-service:
+    url: http://products-service:8081/api/v1
+  kafka:
+    topic:
+      order-events: order-events
+
+# Eureka Client Configuration
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: orders-service
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# Logging
+logging:
+  level:
+    com.linktic_test.orders_service: DEBUG
+    org.springframework.web: DEBUG
+
