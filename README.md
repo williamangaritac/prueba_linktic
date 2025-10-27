@@ -155,6 +155,30 @@ docker-compose up --build -d
 .\docker-deploy.ps1
 ```
 
+### 🗄️ Inicialización Automática de Bases de Datos
+
+**¡IMPORTANTE!** Las bases de datos se inicializan automáticamente con datos de prueba la primera vez que ejecutas el proyecto:
+
+#### PostgreSQL (3 bases de datos):
+- **linktic_products**: 15 productos precargados (Soluciones de software empresarial)
+- **linktic_inventory**: Inventario inicial para cada producto (50-150 unidades)
+- **linktic_notifications**: Tabla lista para almacenar notificaciones
+
+#### MySQL (1 base de datos):
+- **linktic_orders**: Tablas de órdenes y order_items listas para usar
+
+**Los datos persisten** gracias a los volúmenes de Docker (`postgres_data` y `mysql_data`), por lo que no se pierden al reiniciar los contenedores.
+
+#### Para reiniciar con datos frescos:
+
+```bash
+# Detener y eliminar volúmenes (esto borra todos los datos)
+docker-compose down -v
+
+# Volver a levantar (se reinicializarán las bases de datos)
+docker-compose up --build
+```
+
 ### Verificar que los servicios están corriendo
 
 ```bash
@@ -188,6 +212,57 @@ Una vez que todos los contenedores estén corriendo:
 - **Orders Service**: http://localhost:8082/swagger-ui.html
 - **Inventory Service**: http://localhost:8083/swagger-ui.html
 - **Notifications Service**: http://localhost:8084/swagger-ui.html
+
+## 📊 Datos de Prueba Precargados
+
+El sistema viene con datos de prueba listos para usar:
+
+### Productos (15 productos disponibles):
+
+| SKU | Nombre | Precio | Stock Inicial |
+|-----|--------|--------|---------------|
+| 29444ed7a8f8495587365a6b61458735 | Solución E-commerce | $2,805.00 | 100 unidades |
+| a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6 | Sistema de Gestión de Inventario | $1,850.00 | 150 unidades |
+| b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7 | CRM Empresarial | $3,200.00 | 80 unidades |
+| c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8 | Sistema de Facturación | $1,500.00 | 120 unidades |
+| ... | ... | ... | ... |
+
+**Total**: 15 productos con inventario entre 50-150 unidades cada uno.
+
+### Cómo probar el sistema:
+
+1. **Ver productos**: Abre http://localhost:4200 en tu navegador
+2. **Crear una orden**: Selecciona productos y completa el formulario de compra
+3. **Verificar inventario**: El stock se actualiza automáticamente
+4. **Ver notificaciones**: Revisa la tabla `notifications` en PostgreSQL
+
+### Acceso directo a las bases de datos:
+
+```bash
+# PostgreSQL (Products, Inventory, Notifications)
+docker exec -it postgres_db psql -U postgres -d linktic_products
+docker exec -it postgres_db psql -U postgres -d linktic_inventory
+docker exec -it postgres_db psql -U postgres -d linktic_notifications
+
+# MySQL (Orders)
+docker exec -it mysql_db mysql -u linktic -plinktic123 linktic_orders
+```
+
+### Consultas útiles:
+
+```sql
+-- Ver todos los productos
+SELECT * FROM products;
+
+-- Ver inventario disponible
+SELECT * FROM inventory;
+
+-- Ver órdenes creadas
+SELECT * FROM orders;
+
+-- Ver notificaciones enviadas
+SELECT * FROM notifications;
+```
 
 ## 🧪 Pruebas
 
