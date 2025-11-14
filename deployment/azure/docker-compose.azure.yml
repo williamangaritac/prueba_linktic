@@ -1,0 +1,217 @@
+version: '3.8'
+
+# ============================================
+# DOCKER COMPOSE PARA AZURE
+# ============================================
+# Este archivo es optimizado para despliegue en Azure Container Instances
+# Configuración mínima para 2 días de uso
+
+services:
+  # ========================================
+  # MYSQL DATABASE (Orders Service)
+  # ========================================
+  # NOTA: Para producción, recomendamos usar Azure Database for MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db_azure
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-linktic123}
+      MYSQL_DATABASE: linktic_orders
+      MYSQL_USER: linktic
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-linktic123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../microservices_linktic/init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+    restart: unless-stopped
+
+  # ========================================
+  # EUREKA SERVER (Service Discovery)
+  # ========================================
+  eureka-server:
+    build:
+      context: ../microservices_linktic/eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka_server_azure
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 15s
+      start_period: 60s
+    restart: unless-stopped
+
+  # ========================================
+  # API GATEWAY
+  # ========================================
+  api-gateway:
+    build:
+      context: ../microservices_linktic/api-gateway
+      dockerfile: Dockerfile
+    container_name: api_gateway_azure
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://products-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://inventory-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://orders-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://notifications-service:8084
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 15s
+      start_period: 60s
+    restart: unless-stopped
+
+  # ========================================
+  # PRODUCTS SERVICE
+  # ========================================
+  products-service:
+    build:
+      context: ../microservices_linktic/products_service
+      dockerfile: Dockerfile
+    container_name: products_service_azure
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${PRODUCTS_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${PRODUCTS_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PRODUCTS_DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 15s
+      start_period: 90s
+    restart: unless-stopped
+
+  # ========================================
+  # INVENTORY SERVICE
+  # ========================================
+  inventory-service:
+    build:
+      context: ../microservices_linktic/inventory_service
+      dockerfile: Dockerfile
+    container_name: inventory_service_azure
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${INVENTORY_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${INVENTORY_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${INVENTORY_DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 15s
+      start_period: 90s
+    restart: unless-stopped
+
+  # ========================================
+  # ORDERS SERVICE
+  # ========================================
+  orders-service:
+    build:
+      context: ../microservices_linktic/orders_service
+      dockerfile: Dockerfile
+    container_name: orders_service_azure
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/linktic_orders
+      SPRING_DATASOURCE_USERNAME: linktic
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-linktic123}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      PRODUCTS_SERVICE_URL: http://products-service:8081
+      INVENTORY_SERVICE_URL: http://inventory-service:8082
+      # Deshabilitamos Kafka temporalmente para simplificar
+      SPRING_KAFKA_ENABLED: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      products-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 15s
+      start_period: 120s
+    restart: unless-stopped
+
+  # ========================================
+  # NOTIFICATIONS SERVICE
+  # ========================================
+  # NOTA: Sin Kafka, las notificaciones podrían enviarse directamente via REST
+  notifications-service:
+    build:
+      context: ../microservices_linktic/notifications_service
+      dockerfile: Dockerfile
+    container_name: notifications_service_azure
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${NOTIFICATIONS_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${NOTIFICATIONS_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${NOTIFICATIONS_DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      # Deshabilitamos Kafka temporalmente
+      SPRING_KAFKA_ENABLED: "false"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 15s
+      start_period: 90s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+# ============================================
+# NOTAS IMPORTANTES:
+# ============================================
+# 1. Este docker-compose está optimizado para Azure Container Instances
+# 2. Kafka está deshabilitado para reducir complejidad y costos
+# 3. Las bases de datos PostgreSQL están en Supabase (externas)
+# 4. MySQL está incluido aquí, pero se recomienda Azure Database for MySQL
+# 5. Para habilitar Kafka: usar Azure Event Hubs como alternativa managed
