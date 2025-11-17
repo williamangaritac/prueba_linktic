@@ -43,8 +43,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:linktic515@gmail.com}
-    password: ${MAIL_PASSWORD:}
+    username: ${SPRING_MAIL_USERNAME:linktic565@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -74,8 +74,8 @@ app:
     topic:
       order-events: order-events
   email:
-    from: linktic515@gmail.com
-    to: linktic515@gmail.com
+    from: linktic565@gmail.com
+    to: linktic565@gmail.com
     enabled: true
   products-service:
     url: http://products-service:8081/api/v1

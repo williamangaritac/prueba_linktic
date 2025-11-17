@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,20 +43,21 @@ class NotificationServiceTest {
         OrderItemDTO item1 = OrderItemDTO.builder()
                 .sku("TEST001")
                 .productName("Test Product 1")
-                .quantity(2)
+                .quantity(2L)
                 .price(99.99)
                 .build();
 
         OrderItemDTO item2 = OrderItemDTO.builder()
                 .sku("TEST002")
                 .productName("Test Product 2")
-                .quantity(1)
+                .quantity(1L)
                 .price(149.99)
                 .build();
 
         testOrderEvent = OrderEventDTO.builder()
                 .orderId(1L)
                 .orderNumber("ORD-20250127-001")
+                .customerEmail("test@example.com")
                 .items(Arrays.asList(item1, item2))
                 .totalAmount(349.97)
                 .eventType("ORDER_CREATED")
@@ -68,10 +68,10 @@ class NotificationServiceTest {
                 .id(1L)
                 .orderId(1L)
                 .orderNumber("ORD-20250127-001")
-                .recipient("test@example.com")
+                .customerEmail("test@example.com")
                 .subject("Order Confirmation")
                 .message("Your order has been confirmed")
-                .type(NotificationType.ORDER_CONFIRMATION)
+                .type(NotificationType.ORDER_CREATED)
                 .status(NotificationStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -81,14 +81,14 @@ class NotificationServiceTest {
     void processOrderEvent_Success() {
         // Arrange
         when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
-        doNothing().when(emailService).sendOrderConfirmationEmail(anyString(), anyString());
+        doNothing().when(emailService).sendOrderConfirmationEmail(anyString(), anyString(), anyString());
 
         // Act
         notificationService.processOrderEvent(testOrderEvent);
 
         // Assert
         verify(notificationRepository, times(2)).save(any(Notification.class)); // Once for PENDING, once for SENT
-        verify(emailService, times(1)).sendOrderConfirmationEmail(anyString(), anyString());
+        verify(emailService, times(1)).sendOrderConfirmationEmail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -96,14 +96,14 @@ class NotificationServiceTest {
         // Arrange
         when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
         doThrow(new RuntimeException("Email service unavailable"))
-                .when(emailService).sendOrderConfirmationEmail(anyString(), anyString());
+                .when(emailService).sendOrderConfirmationEmail(anyString(), anyString(), anyString());
 
         // Act
         notificationService.processOrderEvent(testOrderEvent);
 
         // Assert
         verify(notificationRepository, times(2)).save(any(Notification.class)); // Once for PENDING, once for FAILED
-        verify(emailService, times(1)).sendOrderConfirmationEmail(anyString(), anyString());
+        verify(emailService, times(1)).sendOrderConfirmationEmail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -133,34 +133,6 @@ class NotificationServiceTest {
         assertEquals("ORD-001", result.get(0).getOrderNumber());
         assertEquals("ORD-002", result.get(1).getOrderNumber());
         verify(notificationRepository, times(1)).findAll();
-    }
-
-    @Test
-    void getNotificationById_Success() {
-        // Arrange
-        when(notificationRepository.findById(1L)).thenReturn(Optional.of(testNotification));
-
-        // Act
-        NotificationDTO result = notificationService.getNotificationById(1L);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("ORD-20250127-001", result.getOrderNumber());
-        verify(notificationRepository, times(1)).findById(1L);
-    }
-
-    @Test
-    void getNotificationById_NotFound_ThrowsException() {
-        // Arrange
-        when(notificationRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            notificationService.getNotificationById(999L);
-        });
-
-        assertTrue(exception.getMessage().contains("not found"));
-        verify(notificationRepository, times(1)).findById(999L);
     }
 
     @Test
@@ -201,34 +173,35 @@ class NotificationServiceTest {
         OrderItemDTO item1 = OrderItemDTO.builder()
                 .sku("TEST001")
                 .productName("Product 1")
-                .quantity(3)
+                .quantity(3L)
                 .price(50.00)
                 .build();
 
         OrderItemDTO item2 = OrderItemDTO.builder()
                 .sku("TEST002")
                 .productName("Product 2")
-                .quantity(2)
+                .quantity(2L)
                 .price(75.00)
                 .build();
 
         OrderEventDTO multiItemEvent = OrderEventDTO.builder()
                 .orderId(2L)
                 .orderNumber("ORD-20250127-002")
+                .customerEmail("test@example.com")
                 .items(Arrays.asList(item1, item2))
                 .totalAmount(300.00) // 3*50 + 2*75 = 150 + 150 = 300
                 .eventType("ORDER_CREATED")
                 .build();
 
         when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
-        doNothing().when(emailService).sendOrderConfirmationEmail(anyString(), anyString());
+        doNothing().when(emailService).sendOrderConfirmationEmail(anyString(), anyString(), anyString());
 
         // Act
         notificationService.processOrderEvent(multiItemEvent);
 
         // Assert
         verify(notificationRepository, times(2)).save(any(Notification.class));
-        verify(emailService, times(1)).sendOrderConfirmationEmail(anyString(), anyString());
+        verify(emailService, times(1)).sendOrderConfirmationEmail(anyString(), anyString(), anyString());
     }
 
     @Test

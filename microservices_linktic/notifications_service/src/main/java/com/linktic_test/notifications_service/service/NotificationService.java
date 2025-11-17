@@ -55,7 +55,12 @@ public class NotificationService {
             // Construir detalles de la orden
             String orderDetails = buildOrderDetails(orderEvent);
 
-            log.info("📧 Preparando envío de email a: {}", defaultRecipientEmail);
+            // Determinar el email del destinatario
+            String recipientEmail = orderEvent.getCustomerEmail() != null && !orderEvent.getCustomerEmail().isEmpty()
+                    ? orderEvent.getCustomerEmail()
+                    : defaultRecipientEmail;
+
+            log.info("📧 Preparando envío de email a: {}", recipientEmail);
             log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             log.info("DETALLES DE LA ORDEN:");
             log.info("{}", orderDetails);
@@ -64,7 +69,7 @@ public class NotificationService {
             // Enviar email
             try {
                 emailService.sendOrderConfirmationEmail(
-                    defaultRecipientEmail,
+                    recipientEmail,
                     orderEvent.getOrderNumber(),
                     orderDetails
                 );
@@ -72,7 +77,7 @@ public class NotificationService {
                 // Actualizar estado a SENT
                 notification.setStatus(NotificationStatus.SENT);
                 notification.setSentAt(LocalDateTime.now());
-                log.info("✅ Email enviado exitosamente a: {}", defaultRecipientEmail);
+                log.info("✅ Email enviado exitosamente a: {}", recipientEmail);
                 log.info("✅ Notificación procesada correctamente para orden: {}", orderEvent.getOrderNumber());
 
             } catch (Exception e) {
@@ -96,11 +101,16 @@ public class NotificationService {
      */
     private Notification createNotification(OrderEventDTO orderEvent) {
         NotificationType type = determineNotificationType(orderEvent.getEventType());
-        
+
+        // Determinar el email del destinatario
+        String recipientEmail = orderEvent.getCustomerEmail() != null && !orderEvent.getCustomerEmail().isEmpty()
+                ? orderEvent.getCustomerEmail()
+                : defaultRecipientEmail;
+
         return Notification.builder()
                 .orderNumber(orderEvent.getOrderNumber())
                 .orderId(orderEvent.getOrderId())
-                .recipientEmail(defaultRecipientEmail)
+                .customerEmail(recipientEmail)
                 .subject("Confirmación de Orden - " + orderEvent.getOrderNumber())
                 .message(buildOrderDetails(orderEvent))
                 .status(NotificationStatus.PENDING)
@@ -185,7 +195,7 @@ public class NotificationService {
                 .id(notification.getId())
                 .orderNumber(notification.getOrderNumber())
                 .orderId(notification.getOrderId())
-                .recipientEmail(notification.getRecipientEmail())
+                .recipientEmail(notification.getCustomerEmail())
                 .subject(notification.getSubject())
                 .message(notification.getMessage())
                 .status(notification.getStatus())
