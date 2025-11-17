@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class OrderServiceTest {
 
     @Mock
@@ -42,6 +45,9 @@ class OrderServiceTest {
 
     @Mock
     private WebClient.RequestBodySpec requestBodySpec;
+
+    @Mock
+    private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Mock
     private WebClient.ResponseSpec responseSpec;
@@ -86,9 +92,9 @@ class OrderServiceTest {
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(any())).thenReturn(requestBodySpec);
-        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("Success"));
+        when(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.empty());
     }
 
     @Test
@@ -101,16 +107,16 @@ class OrderServiceTest {
 
         // Assert
         assertNotNull(response);
-        assertNotNull(response.getOrderNumber());
-        assertTrue(response.getOrderNumber().startsWith("ORD-"));
-        assertEquals(1, response.getOrderItems().size());
+        assertNotNull(response.orderNumber());
+        assertTrue(response.orderNumber().startsWith("ORD-"));
+        assertEquals(1, response.orderItems().size());
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
     @Test
     void createOrder_InventoryUpdateFails_ThrowsException() {
         // Arrange
-        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.error(new RuntimeException("Inventory service unavailable")));
+        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.error(new RuntimeException("Inventory service unavailable")));
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
@@ -127,26 +133,25 @@ class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(testOrder));
 
         // Act
-        OrderResponse response = orderService.getOrderById(1L);
+        Optional<OrderResponse> response = orderService.getOrderById(1L);
 
         // Assert
-        assertNotNull(response);
-        assertEquals("ORD-20250127-001", response.getOrderNumber());
-        assertEquals(1, response.getOrderItems().size());
+        assertTrue(response.isPresent());
+        assertEquals("ORD-20250127-001", response.get().orderNumber());
+        assertEquals(1, response.get().orderItems().size());
         verify(orderRepository, times(1)).findById(1L);
     }
 
     @Test
-    void getOrderById_NotFound_ThrowsException() {
+    void getOrderById_NotFound_ReturnsEmpty() {
         // Arrange
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            orderService.getOrderById(1L);
-        });
+        // Act
+        Optional<OrderResponse> response = orderService.getOrderById(1L);
 
-        assertTrue(exception.getMessage().contains("not found"));
+        // Assert
+        assertFalse(response.isPresent());
         verify(orderRepository, times(1)).findById(1L);
     }
 
@@ -156,11 +161,11 @@ class OrderServiceTest {
         when(orderRepository.findByOrderNumber("ORD-20250127-001")).thenReturn(Optional.of(testOrder));
 
         // Act
-        OrderResponse response = orderService.getOrderByOrderNumber("ORD-20250127-001");
+        Optional<OrderResponse> response = orderService.getOrderByOrderNumber("ORD-20250127-001");
 
         // Assert
-        assertNotNull(response);
-        assertEquals("ORD-20250127-001", response.getOrderNumber());
+        assertTrue(response.isPresent());
+        assertEquals("ORD-20250127-001", response.get().orderNumber());
         verify(orderRepository, times(1)).findByOrderNumber("ORD-20250127-001");
     }
 
@@ -176,7 +181,7 @@ class OrderServiceTest {
         // Assert
         assertNotNull(responses);
         assertEquals(1, responses.size());
-        assertEquals("ORD-20250127-001", responses.get(0).getOrderNumber());
+        assertEquals("ORD-20250127-001", responses.get(0).orderNumber());
         verify(orderRepository, times(1)).findAll();
     }
 
@@ -184,7 +189,7 @@ class OrderServiceTest {
     void generateOrderNumber_CreatesUniqueNumber() {
         // This test verifies the order number format
         // We can't directly test the private method, but we can verify through createOrder
-        
+
         // Arrange
         when(orderRepository.save(any(Order.class))).thenReturn(testOrder);
 
@@ -192,8 +197,8 @@ class OrderServiceTest {
         OrderResponse response = orderService.createOrder(testOrderRequest);
 
         // Assert
-        assertNotNull(response.getOrderNumber());
-        assertTrue(response.getOrderNumber().matches("ORD-\\d{8}-\\d{3}"));
+        assertNotNull(response.orderNumber());
+        assertTrue(response.orderNumber().matches("ORD-\\d{8}-\\d{3}"));
     }
 
     @Test
@@ -240,7 +245,7 @@ class OrderServiceTest {
 
         // Assert
         assertNotNull(response);
-        assertEquals(2, response.getOrderItems().size());
+        assertEquals(2, response.orderItems().size());
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
