@@ -11,6 +11,7 @@ import { ProductCardComponent } from '../../components/product-card/product-card
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { ProductModalComponent } from '../../components/product-modal/product-modal.component';
 import { PurchaseModalComponent } from '../../components/purchase-modal/purchase-modal.component';
+import { CreateProductModalComponent } from '../../components/create-product-modal/create-product-modal.component';
 
 /**
  * Catalog Component
@@ -24,7 +25,8 @@ import { PurchaseModalComponent } from '../../components/purchase-modal/purchase
     ProductCardComponent,
     PaginationComponent,
     ProductModalComponent,
-    PurchaseModalComponent
+    PurchaseModalComponent,
+    CreateProductModalComponent
   ],
   templateUrl: './catalog.component.html',
   styleUrls: ['./catalog.component.css']
@@ -34,6 +36,7 @@ export class CatalogComponent implements OnInit, OnDestroy {
   selectedProduct: Product | null = null;
   isModalOpen: boolean = false;
   isPurchaseModalOpen: boolean = false;
+  isCreateProductModalOpen: boolean = false;
   productToPurchase: Product | null = null;
   loading: boolean = false;
 
@@ -270,6 +273,37 @@ El correo incluye los detalles completos de tu compra.
    */
   get currentPageForPagination(): number {
     return this.currentPage + 1;
+  }
+
+  /**
+   * Open create product modal
+   */
+  openCreateProductModal(): void {
+    this.isCreateProductModalOpen = true;
+  }
+
+  /**
+   * Close create product modal
+   */
+  closeCreateProductModal(): void {
+    this.isCreateProductModalOpen = false;
+  }
+
+  /**
+   * Handle product created event
+   * Reload products and show success message
+   */
+  onProductCreated(): void {
+    console.log('Product created successfully, reloading products...');
+
+    // Go to first page to see the new product
+    this.currentPage = 0;
+
+    // Reload products
+    this.loadProducts();
+
+    // Show success message
+    alert('✅ Producto creado exitosamente');
   }
 }
 

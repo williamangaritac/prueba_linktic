@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Product, Page } from '../models/product.model';
+import { Product, ProductRequest, Page } from '../models/product.model';
 
 /**
  * Product Repository Interface
@@ -24,6 +24,12 @@ export interface IProductRepository {
    * @param page Page number (0-based)
    */
   getActiveProducts(page: number): Observable<Page<Product>>;
+
+  /**
+   * Create a new product
+   * @param productRequest Product data to create
+   */
+  createProduct(productRequest: ProductRequest): Observable<Product>;
 }
 
 export const PRODUCT_REPOSITORY_TOKEN = new InjectionToken<IProductRepository>(

@@ -1,20 +1,51 @@
-<div class="flex justify-center items-center gap-4 mb-8">
-  <button 
+<div class="flex justify-center items-center gap-2 mb-8 flex-wrap">
+  <!-- Botón Anterior -->
+  <button
     (click)="previousPage()"
     [disabled]="isPreviousDisabled"
-    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
-    Anterior
+    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500"
+    title="Página anterior">
+    ← Anterior
   </button>
-  
-  <span class="text-gray-700 font-medium">
-    Página {{ currentPage }} de {{ totalPages }}
-  </span>
-  
-  <button 
+
+  <!-- Botones de páginas -->
+  <div class="flex gap-1">
+    <ng-container *ngFor="let page of pageNumbers">
+      <!-- Botón de número de página -->
+      <button
+        *ngIf="isNumber(page)"
+        (click)="goToPage($any(page))"
+        [class.bg-blue-600]="page === currentPage"
+        [class.text-white]="page === currentPage"
+        [class.bg-white]="page !== currentPage"
+        [class.text-gray-700]="page !== currentPage"
+        [class.hover:bg-blue-100]="page !== currentPage"
+        class="min-w-[40px] px-3 py-2 border border-gray-300 rounded-md transition-colors font-medium"
+        [title]="'Ir a página ' + page">
+        {{ page }}
+      </button>
+
+      <!-- Puntos suspensivos -->
+      <span
+        *ngIf="!isNumber(page)"
+        class="px-3 py-2 text-gray-500 font-medium">
+        ...
+      </span>
+    </ng-container>
+  </div>
+
+  <!-- Botón Siguiente -->
+  <button
     (click)="nextPage()"
     [disabled]="isNextDisabled"
-    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
-    Siguiente
+    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500"
+    title="Página siguiente">
+    Siguiente →
   </button>
+</div>
+
+<!-- Información de página (opcional) -->
+<div class="text-center text-sm text-gray-600 mb-4">
+  Página {{ currentPage }} de {{ totalPages }}
 </div>
 

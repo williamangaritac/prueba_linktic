@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Product, Page } from '../../core/models/product.model';
+import { Product, ProductRequest, Page } from '../../core/models/product.model';
 import { IProductRepository } from '../../core/interfaces/product-repository.interface';
 import { environment } from '../../../environments/environment';
 
@@ -38,6 +38,14 @@ export class ProductRepository implements IProductRepository {
    */
   getActiveProducts(page: number = 0): Observable<Page<Product>> {
     return this.http.get<Page<Product>>(`${this.apiUrl}/active?page=${page}&size=6`);
+  }
+
+  /**
+   * Create a new product
+   * POST /api/v1/products
+   */
+  createProduct(productRequest: ProductRequest): Observable<Product> {
+    return this.http.post<Product>(this.apiUrl, productRequest);
   }
 }
 

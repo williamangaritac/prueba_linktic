@@ -14,6 +14,18 @@ export interface Product {
 }
 
 /**
+ * Product Request model matching backend ProductRequest DTO
+ * Used for creating new products
+ */
+export interface ProductRequest {
+  sku: string;
+  name: string;
+  description: string;
+  price: number;
+  status: boolean;
+}
+
+/**
  * Inventory model matching backend InventoryResponse DTO
  */
 export interface Inventory {
