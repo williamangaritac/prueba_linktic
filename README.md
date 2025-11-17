@@ -463,7 +463,6 @@ netstat -ano | findstr :8080
 ## 📞 Contacto
 
 **Desarrollador**: William Angarita  
-**Email**: [tu-email@example.com]  
 **GitHub**: https://github.com/williamangaritac
 
 ## 📄 Licencia
