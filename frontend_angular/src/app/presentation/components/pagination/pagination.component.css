@@ -1,2 +1,30 @@
-/* Estilos específicos de paginación si son necesarios */
+/* Estilos específicos de paginación */
+
+/* Asegurar que los botones de página tengan el mismo tamaño */
+button {
+  min-height: 40px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Efecto hover para botones de página */
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón de página activa */
+button.bg-blue-600 {
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive: ajustar en pantallas pequeñas */
+@media (max-width: 640px) {
+  button {
+    min-width: 36px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
 

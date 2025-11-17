@@ -1,8 +1,20 @@
 <section id="catalogo" class="py-12">
   <div class="container mx-auto px-6">
-    <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">
-      Nuestro Catálogo de Soluciones
-    </h2>
+    <!-- Header with Title and Create Button -->
+    <div class="flex justify-between items-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900">
+        Nuestro Catálogo de Soluciones
+      </h2>
+      <button
+        (click)="openCreateProductModal()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-all duration-300 flex items-center space-x-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>Crear Producto</span>
+      </button>
+    </div>
 
     <!-- Loading Indicator -->
     <div *ngIf="loading" class="text-center py-8">
@@ -66,4 +78,11 @@
   (close)="onClosePurchaseModal()"
   (confirmPurchase)="onConfirmPurchase($event)">
 </app-purchase-modal>
+
+<!-- Modal de Crear Producto -->
+<app-create-product-modal
+  *ngIf="isCreateProductModalOpen"
+  (close)="closeCreateProductModal()"
+  (productCreated)="onProductCreated()">
+</app-create-product-modal>
 
