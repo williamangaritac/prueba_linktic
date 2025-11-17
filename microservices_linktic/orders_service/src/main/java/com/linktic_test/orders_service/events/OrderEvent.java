@@ -15,6 +15,9 @@ public record OrderEvent(
         @JsonProperty("orderNumber")
         String orderNumber,
 
+        @JsonProperty("customerEmail")
+        String customerEmail,
+
         @JsonProperty("items")
         List<OrderEventItem> items,
 

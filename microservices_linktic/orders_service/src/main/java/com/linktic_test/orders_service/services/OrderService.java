@@ -169,6 +169,7 @@ public class OrderService {
             OrderEvent event = new OrderEvent(
                     order.getId(),
                     order.getOrderNumber(),
+                    order.getCustomerEmail(),
                     eventItems,
                     totalAmount,
                     "ORDER_CREATED",
