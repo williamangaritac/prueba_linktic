@@ -1,7 +1,7 @@
 package com.linktic_test.inventory_service.services;
 
-import com.linktic_test.inventory_service.model.dtos.InventoryRequest;
 import com.linktic_test.inventory_service.model.dtos.InventoryResponse;
+import com.linktic_test.inventory_service.model.dtos.InventoryUpdateRequest;
 import com.linktic_test.inventory_service.model.dtos.OrderItemRequest;
 import com.linktic_test.inventory_service.model.entities.Inventory;
 import com.linktic_test.inventory_service.repositories.InventoryRepository;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,14 +27,11 @@ class InventoryServiceTest {
     @Mock
     private InventoryRepository inventoryRepository;
 
-    @Mock
-    private KafkaTemplate<String, String> kafkaTemplate;
-
     @InjectMocks
     private InventoryService inventoryService;
 
     private Inventory testInventory;
-    private InventoryRequest testInventoryRequest;
+    private InventoryUpdateRequest testInventoryUpdateRequest;
 
     @BeforeEach
     void setUp() {
@@ -44,9 +40,9 @@ class InventoryServiceTest {
         testInventory.setSku("TEST001");
         testInventory.setQuantity(100L);
 
-        testInventoryRequest = new InventoryRequest();
-        testInventoryRequest.setSku("TEST001");
-        testInventoryRequest.setQuantity(100L);
+        testInventoryUpdateRequest = new InventoryUpdateRequest();
+        testInventoryUpdateRequest.setSku("TEST001");
+        testInventoryUpdateRequest.setQuantity(100L);
     }
 
     @Test
@@ -157,9 +153,9 @@ class InventoryServiceTest {
     }
 
     @Test
-    void updateInventory_Success() {
+    void updateInventoryQuantity_Success() {
         // Arrange
-        InventoryRequest updateRequest = new InventoryRequest();
+        InventoryUpdateRequest updateRequest = new InventoryUpdateRequest();
         updateRequest.setSku("TEST001");
         updateRequest.setQuantity(200L);
 
@@ -167,7 +163,7 @@ class InventoryServiceTest {
         when(inventoryRepository.save(any(Inventory.class))).thenReturn(testInventory);
 
         // Act
-        InventoryResponse response = inventoryService.updateInventory(updateRequest);
+        InventoryResponse response = inventoryService.updateInventoryQuantity(updateRequest);
 
         // Assert
         assertNotNull(response);
@@ -220,9 +216,9 @@ class InventoryServiceTest {
     }
 
     @Test
-    void updateInventory_NotFound_ThrowsException() {
+    void updateInventoryQuantity_NotFound_ThrowsException() {
         // Arrange
-        InventoryRequest updateRequest = new InventoryRequest();
+        InventoryUpdateRequest updateRequest = new InventoryUpdateRequest();
         updateRequest.setSku("NONEXISTENT");
         updateRequest.setQuantity(100L);
 
@@ -230,9 +226,9 @@ class InventoryServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            inventoryService.updateInventory(updateRequest);
+            inventoryService.updateInventoryQuantity(updateRequest);
         });
-        
+
         assertTrue(exception.getMessage().contains("not found"));
         verify(inventoryRepository, never()).save(any(Inventory.class));
     }
