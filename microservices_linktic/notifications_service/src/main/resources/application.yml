@@ -47,7 +47,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: linktic515@gmail.com
+    username: linktic565@gmail.com
     password: # Dejar vacío para desarrollo - usar variables de entorno en producción
     properties:
       mail:
@@ -109,8 +109,8 @@ app:
     topic:
       order-events: order-events
   email:
-    from: linktic515@gmail.com
-    to: linktic515@gmail.com
+    from: linktic565@gmail.com
+    to: linktic565@gmail.com
     enabled: true # Cambiar a false para deshabilitar envío de emails en desarrollo
   products-service:
     url: http://localhost:8081/api/v1
