@@ -53,7 +53,7 @@ class ProductControllerTest {
         request.setPrice(new BigDecimal("99.99"));
         request.setStatus(true);
 
-        mockMvc.perform(post("/api/v1/products")
+        mockMvc.perform(post("/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -73,7 +73,7 @@ class ProductControllerTest {
         product.setStatus(true);
         Product savedProduct = productRepository.save(product);
 
-        mockMvc.perform(get("/api/v1/products/{id}", savedProduct.getId()))
+        mockMvc.perform(get("/products/{id}", savedProduct.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedProduct.getId()))
                 .andExpect(jsonPath("$.sku").value("TEST002"))
@@ -97,7 +97,7 @@ class ProductControllerTest {
         updateRequest.setPrice(new BigDecimal("299.99"));
         updateRequest.setStatus(false);
 
-        mockMvc.perform(put("/api/v1/products/{id}", savedProduct.getId())
+        mockMvc.perform(put("/products/{id}", savedProduct.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
@@ -117,7 +117,7 @@ class ProductControllerTest {
         product.setStatus(true);
         Product savedProduct = productRepository.save(product);
 
-        mockMvc.perform(delete("/api/v1/products/{id}", savedProduct.getId()))
+        mockMvc.perform(delete("/products/{id}", savedProduct.getId()))
                 .andExpect(status().isNoContent());
     }
 
@@ -134,7 +134,7 @@ class ProductControllerTest {
             productRepository.save(product);
         }
 
-        mockMvc.perform(get("/api/v1/products")
+        mockMvc.perform(get("/products")
                 .param("page", "0")
                 .param("size", "3"))
                 .andExpect(status().isOk())

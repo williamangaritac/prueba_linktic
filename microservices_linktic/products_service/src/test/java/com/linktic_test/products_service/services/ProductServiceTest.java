@@ -156,14 +156,15 @@ class ProductServiceTest {
     @Test
     void deleteProduct_Success() {
         // Arrange
-        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
+        when(productRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(productRepository).deleteById(1L);
 
         // Act
         productService.deleteProduct(1L);
 
         // Assert
-        verify(productRepository, times(1)).findById(1L);
-        verify(productRepository, times(1)).delete(testProduct);
+        verify(productRepository, times(1)).existsById(1L);
+        verify(productRepository, times(1)).deleteById(1L);
     }
 
     @Test
@@ -224,7 +225,7 @@ class ProductServiceTest {
         Page<Product> productPage = new PageImpl<>(products);
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(productRepository.findByStatusTrue(pageable)).thenReturn(productPage);
+        when(productRepository.findActiveProducts(pageable)).thenReturn(productPage);
 
         // Act
         Page<ProductResponse> response = productService.getActiveProducts(pageable);
@@ -233,7 +234,7 @@ class ProductServiceTest {
         assertNotNull(response);
         assertEquals(1, response.getTotalElements());
         assertTrue(response.getContent().get(0).getStatus());
-        verify(productRepository, times(1)).findByStatusTrue(pageable);
+        verify(productRepository, times(1)).findActiveProducts(pageable);
     }
 }
 
