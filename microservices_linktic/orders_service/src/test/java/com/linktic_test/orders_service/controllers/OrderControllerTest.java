@@ -2,12 +2,14 @@ package com.linktic_test.orders_service.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linktic_test.orders_service.model.dtos.OrderItemRequest;
+import com.linktic_test.orders_service.model.dtos.OrderItemsResponse;
 import com.linktic_test.orders_service.model.dtos.OrderRequest;
 import com.linktic_test.orders_service.model.dtos.OrderResponse;
 import com.linktic_test.orders_service.services.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -23,7 +25,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(OrderController.class)
+@WebMvcTest(controllers = OrderController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class OrderControllerTest {
 
     @Autowired
@@ -40,16 +43,10 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Setup test order response
-        OrderResponse.OrderItemResponse itemResponse = new OrderResponse.OrderItemResponse();
-        itemResponse.setSku("TEST001");
-        itemResponse.setPrice(99.99);
-        itemResponse.setQuantity(2L);
+        // Setup test order response - OrderResponse is a record, use constructor
+        OrderItemsResponse itemResponse = new OrderItemsResponse(1L, "TEST001", 99.99, 2L);
 
-        testOrderResponse = new OrderResponse();
-        testOrderResponse.setId(1L);
-        testOrderResponse.setOrderNumber("ORD-20250127-001");
-        testOrderResponse.setOrderItems(Arrays.asList(itemResponse));
+        testOrderResponse = new OrderResponse(1L, "ORD-20250127-001", Arrays.asList(itemResponse));
 
         // Setup test order request
         OrderItemRequest itemRequest = new OrderItemRequest();
@@ -67,7 +64,7 @@ class OrderControllerTest {
         when(orderService.createOrder(any(OrderRequest.class))).thenReturn(testOrderResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/orders")
+        mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testOrderRequest)))
                 .andExpect(status().isCreated())
@@ -85,7 +82,7 @@ class OrderControllerTest {
         invalidRequest.setOrderItems(Arrays.asList());
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/orders")
+        mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -94,10 +91,10 @@ class OrderControllerTest {
     @Test
     void getOrderById_Success() throws Exception {
         // Arrange
-        when(orderService.getOrderById(1L)).thenReturn(testOrderResponse);
+        when(orderService.getOrderById(1L)).thenReturn(java.util.Optional.of(testOrderResponse));
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/orders/1"))
+        mockMvc.perform(get("/orders/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.orderNumber").value("ORD-20250127-001"));
@@ -108,12 +105,11 @@ class OrderControllerTest {
     @Test
     void getOrderById_NotFound() throws Exception {
         // Arrange
-        when(orderService.getOrderById(999L))
-                .thenThrow(new RuntimeException("Order not found with ID: 999"));
+        when(orderService.getOrderById(999L)).thenReturn(java.util.Optional.empty());
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/orders/999"))
-                .andExpect(status().isInternalServerError());
+        mockMvc.perform(get("/orders/999"))
+                .andExpect(status().isNotFound());
 
         verify(orderService, times(1)).getOrderById(999L);
     }
@@ -121,10 +117,10 @@ class OrderControllerTest {
     @Test
     void getOrderByOrderNumber_Success() throws Exception {
         // Arrange
-        when(orderService.getOrderByOrderNumber("ORD-20250127-001")).thenReturn(testOrderResponse);
+        when(orderService.getOrderByOrderNumber("ORD-20250127-001")).thenReturn(java.util.Optional.of(testOrderResponse));
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/orders/number/ORD-20250127-001"))
+        mockMvc.perform(get("/orders/number/ORD-20250127-001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderNumber").value("ORD-20250127-001"));
 
@@ -134,26 +130,16 @@ class OrderControllerTest {
     @Test
     void getAllOrders_Success() throws Exception {
         // Arrange
-        OrderResponse.OrderItemResponse item1 = new OrderResponse.OrderItemResponse();
-        item1.setSku("TEST001");
-        item1.setPrice(99.99);
-        item1.setQuantity(2L);
+        OrderItemsResponse item1 = new OrderItemsResponse(1L, "TEST001", 99.99, 2L);
 
-        OrderResponse order1 = new OrderResponse();
-        order1.setId(1L);
-        order1.setOrderNumber("ORD-20250127-001");
-        order1.setOrderItems(Arrays.asList(item1));
-
-        OrderResponse order2 = new OrderResponse();
-        order2.setId(2L);
-        order2.setOrderNumber("ORD-20250127-002");
-        order2.setOrderItems(Arrays.asList(item1));
+        OrderResponse order1 = new OrderResponse(1L, "ORD-20250127-001", Arrays.asList(item1));
+        OrderResponse order2 = new OrderResponse(2L, "ORD-20250127-002", Arrays.asList(item1));
 
         List<OrderResponse> orders = Arrays.asList(order1, order2);
         when(orderService.getAllOrders()).thenReturn(orders);
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/orders"))
+        mockMvc.perform(get("/orders"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].orderNumber").value("ORD-20250127-001"))
@@ -178,25 +164,15 @@ class OrderControllerTest {
         OrderRequest multiItemRequest = new OrderRequest();
         multiItemRequest.setOrderItems(Arrays.asList(item1, item2));
 
-        OrderResponse.OrderItemResponse responseItem1 = new OrderResponse.OrderItemResponse();
-        responseItem1.setSku("TEST001");
-        responseItem1.setPrice(99.99);
-        responseItem1.setQuantity(2L);
+        OrderItemsResponse responseItem1 = new OrderItemsResponse(1L, "TEST001", 99.99, 2L);
+        OrderItemsResponse responseItem2 = new OrderItemsResponse(2L, "TEST002", 149.99, 1L);
 
-        OrderResponse.OrderItemResponse responseItem2 = new OrderResponse.OrderItemResponse();
-        responseItem2.setSku("TEST002");
-        responseItem2.setPrice(149.99);
-        responseItem2.setQuantity(1L);
-
-        OrderResponse multiItemResponse = new OrderResponse();
-        multiItemResponse.setId(1L);
-        multiItemResponse.setOrderNumber("ORD-20250127-003");
-        multiItemResponse.setOrderItems(Arrays.asList(responseItem1, responseItem2));
+        OrderResponse multiItemResponse = new OrderResponse(1L, "ORD-20250127-003", Arrays.asList(responseItem1, responseItem2));
 
         when(orderService.createOrder(any(OrderRequest.class))).thenReturn(multiItemResponse);
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/orders")
+        mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(multiItemRequest)))
                 .andExpect(status().isCreated())
@@ -214,7 +190,7 @@ class OrderControllerTest {
                 .thenThrow(new RuntimeException("Failed to update inventory"));
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/orders")
+        mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testOrderRequest)))
                 .andExpect(status().isInternalServerError());

@@ -38,13 +38,14 @@ class OrderEventConsumerTest {
         OrderItemDTO item1 = OrderItemDTO.builder()
                 .sku("TEST001")
                 .productName("Test Product 1")
-                .quantity(2)
+                .quantity(2L)
                 .price(99.99)
                 .build();
 
         testOrderEvent = OrderEventDTO.builder()
                 .orderId(1L)
                 .orderNumber("ORD-20250127-001")
+                .customerEmail("test@example.com")
                 .items(Arrays.asList(item1))
                 .totalAmount(199.98)
                 .eventType("ORDER_CREATED")
@@ -127,14 +128,14 @@ class OrderEventConsumerTest {
         OrderItemDTO item1 = OrderItemDTO.builder()
                 .sku("TEST001")
                 .productName("Product 1")
-                .quantity(2)
+                .quantity(2L)
                 .price(50.00)
                 .build();
 
         OrderItemDTO item2 = OrderItemDTO.builder()
                 .sku("TEST002")
                 .productName("Product 2")
-                .quantity(1)
+                .quantity(1L)
                 .price(100.00)
                 .build();
 

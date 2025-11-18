@@ -13,13 +13,13 @@ import java.util.Optional;
  */
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    
+
     List<Notification> findByOrderNumber(String orderNumber);
-    
+
     List<Notification> findByStatus(NotificationStatus status);
-    
-    List<Notification> findByRecipientEmail(String recipientEmail);
-    
+
+    List<Notification> findByCustomerEmail(String customerEmail);
+
     Optional<Notification> findByOrderId(Long orderId);
 }
 

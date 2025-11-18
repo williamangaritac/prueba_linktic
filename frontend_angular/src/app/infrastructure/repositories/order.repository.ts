@@ -7,13 +7,13 @@ import { environment } from '../../../environments/environment';
 
 /**
  * Order Repository Implementation
- * Handles HTTP requests to Orders Service through API Gateway
+ * Handles HTTP requests to Orders Service directly
  */
 @Injectable({
   providedIn: 'root'
 })
 export class OrderRepository implements IOrderRepository {
-  private readonly apiUrl = `${environment.apiUrl}/frontend/orders`;
+  private readonly apiUrl = `${environment.ordersApiUrl}/frontend/orders`;
 
   constructor(private http: HttpClient) {}
 

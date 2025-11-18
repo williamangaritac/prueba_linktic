@@ -25,10 +25,10 @@ public class Notification {
     
     @Column(name = "order_id")
     private Long orderId;
-    
-    @Column(name = "recipient_email", nullable = false)
-    private String recipientEmail;
-    
+
+    @Column(name = "customer_email", nullable = false)
+    private String customerEmail;
+
     @Column(name = "subject", nullable = false)
     private String subject;
     

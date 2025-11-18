@@ -1,0 +1,92 @@
+version: '3.8'
+
+# ============================================
+# LINKTIC STORE - Database Services
+# ============================================
+# Este archivo contiene solo las bases de datos
+# Para levantar: docker-compose -f docker-compose.db.yml up -d
+# Para detener: docker-compose -f docker-compose.db.yml down
+
+services:
+  # ==========================================
+  # PostgreSQL - Products, Inventory, Notifications
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: linktic-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-linktic_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-linktic_password_2024}
+      POSTGRES_DB: postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
+    networks:
+      - linktic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-linktic_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================
+  # MySQL - Orders Service
+  # ==========================================
+  mysql:
+    image: mysql:8.0
+    container_name: linktic-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password_2024}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-linktic_orders}
+      MYSQL_USER: ${MYSQL_USER:-linktic_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-linktic_password_2024}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init-scripts/init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
+    networks:
+      - linktic-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_password_2024}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================
+  # Adminer - Database Management UI
+  # ==========================================
+  adminer:
+    image: adminer:latest
+    container_name: linktic-adminer
+    ports:
+      - "8090:8080"
+    networks:
+      - linktic-network
+    depends_on:
+      - postgres
+      - mysql
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+# ==========================================
+# Volumes
+# ==========================================
+volumes:
+  postgres_data:
+    driver: local
+  mysql_data:
+    driver: local
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  linktic-network:
+    driver: bridge
+

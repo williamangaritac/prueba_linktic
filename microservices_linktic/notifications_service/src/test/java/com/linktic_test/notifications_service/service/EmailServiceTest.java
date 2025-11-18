@@ -28,20 +28,20 @@ class EmailServiceTest {
     void setUp() {
         // Set private fields using ReflectionTestUtils
         ReflectionTestUtils.setField(emailService, "fromEmail", "noreply@linktic.com");
-        ReflectionTestUtils.setField(emailService, "toEmails", "william.angaritac@gmail.com,contacto@linktic.com");
         ReflectionTestUtils.setField(emailService, "emailEnabled", true);
     }
 
     @Test
     void sendOrderConfirmationEmail_Success() {
         // Arrange
+        String to = "william.angaritac@gmail.com,contacto@linktic.com";
         String orderNumber = "ORD-20250127-001";
         String orderDetails = "Product: Test Product, Quantity: 2, Price: $99.99";
 
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
         // Act
-        emailService.sendOrderConfirmationEmail(orderNumber, orderDetails);
+        emailService.sendOrderConfirmationEmail(to, orderNumber, orderDetails);
 
         // Assert
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -60,11 +60,12 @@ class EmailServiceTest {
     void sendOrderConfirmationEmail_EmailDisabled_DoesNotSend() {
         // Arrange
         ReflectionTestUtils.setField(emailService, "emailEnabled", false);
+        String to = "test@example.com";
         String orderNumber = "ORD-20250127-001";
         String orderDetails = "Product: Test Product";
 
         // Act
-        emailService.sendOrderConfirmationEmail(orderNumber, orderDetails);
+        emailService.sendOrderConfirmationEmail(to, orderNumber, orderDetails);
 
         // Assert
         verify(mailSender, never()).send(any(SimpleMailMessage.class));
@@ -97,6 +98,7 @@ class EmailServiceTest {
     @Test
     void sendOrderConfirmationEmail_WithMultipleItems_FormatsCorrectly() {
         // Arrange
+        String to = "test@example.com";
         String orderNumber = "ORD-20250127-002";
         String orderDetails = """
                 Item 1: Product A, Quantity: 2, Price: $50.00
@@ -107,7 +109,7 @@ class EmailServiceTest {
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
         // Act
-        emailService.sendOrderConfirmationEmail(orderNumber, orderDetails);
+        emailService.sendOrderConfirmationEmail(to, orderNumber, orderDetails);
 
         // Assert
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -123,6 +125,7 @@ class EmailServiceTest {
     @Test
     void sendOrderConfirmationEmail_MailSenderThrowsException_LogsError() {
         // Arrange
+        String to = "test@example.com";
         String orderNumber = "ORD-20250127-003";
         String orderDetails = "Test Details";
 
@@ -131,7 +134,7 @@ class EmailServiceTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
-            emailService.sendOrderConfirmationEmail(orderNumber, orderDetails);
+            emailService.sendOrderConfirmationEmail(to, orderNumber, orderDetails);
         });
 
         verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
@@ -155,13 +158,14 @@ class EmailServiceTest {
     @Test
     void sendOrderConfirmationEmail_ParsesMultipleEmailAddresses() {
         // Arrange
+        String to = "william.angaritac@gmail.com,contacto@linktic.com";
         String orderNumber = "ORD-20250127-004";
         String orderDetails = "Test Order Details";
 
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
         // Act
-        emailService.sendOrderConfirmationEmail(orderNumber, orderDetails);
+        emailService.sendOrderConfirmationEmail(to, orderNumber, orderDetails);
 
         // Assert
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -177,12 +181,13 @@ class EmailServiceTest {
     @Test
     void sendOrderConfirmationEmail_NullOrderNumber_HandlesGracefully() {
         // Arrange
+        String to = "test@example.com";
         String orderDetails = "Test Details";
 
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
         // Act
-        emailService.sendOrderConfirmationEmail(null, orderDetails);
+        emailService.sendOrderConfirmationEmail(to, null, orderDetails);
 
         // Assert
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -196,13 +201,14 @@ class EmailServiceTest {
     @Test
     void sendOrderConfirmationEmail_EmptyOrderDetails_SendsEmail() {
         // Arrange
+        String to = "test@example.com";
         String orderNumber = "ORD-20250127-005";
         String orderDetails = "";
 
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
         // Act
-        emailService.sendOrderConfirmationEmail(orderNumber, orderDetails);
+        emailService.sendOrderConfirmationEmail(to, orderNumber, orderDetails);
 
         // Assert
         verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
